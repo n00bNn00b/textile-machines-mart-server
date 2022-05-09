@@ -50,13 +50,29 @@ const run = async () => {
     });
 
     // single product API ends here
+
+    //   add item API starts Here
+    //   data will be added by user through this api to mongoDB
+    app.post("/addItem", async (req, res) => {
+      const userItem = req.body;
+      const addedItem = await machinesCollection(userItem);
+      res.send(addedItem);
+    });
+    //   add item API Ends here
   } finally {
     //
   }
 };
 run().catch(console.dir);
 
-// ==============MongoDB Config Ends================
+/**
+ * ============================================
+ *
+ *          MongoDB Config Ends Here
+ *
+ * ============================================
+ *
+ */
 
 // root api
 app.get("/", (req, res) => {
