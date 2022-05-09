@@ -16,7 +16,7 @@ app.use(express.json());
  *
  */
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.58jrk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -32,13 +32,24 @@ const run = async () => {
       .collection("products");
     console.log("db connected!");
 
-    //   machines API
+    //   machines/products API
     app.get("/products", async (req, res) => {
       const query = {};
       const cursor = machinesCollection.find(query);
       const products = await cursor.toArray();
       res.send(products);
     });
+    //   all products API Ends======
+
+    // single product api starts here
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const product = await machinesCollection.findOne(query);
+      res.send(product);
+    });
+
+    // single product API ends here
   } finally {
     //
   }
