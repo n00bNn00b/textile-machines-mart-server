@@ -10,9 +10,11 @@ app.use(cors());
 app.use(express.json());
 
 /**
+ *
  * ======================================
  *          MongoDB Configuration
  * ======================================
+ *
  *
  */
 
@@ -51,14 +53,54 @@ const run = async () => {
 
     // single product API ends here
 
+    // update in UI and in DB
+    app.put("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedQuantity = req.body;
+      console.log(updatedQuantity);
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateItem = {
+        $set: {
+          quantity: parseInt(updatedQuantity.quantity),
+        },
+      };
+      const result = await machinesCollection.updateOne(
+        query,
+        updateItem,
+        options
+      );
+      res.send(result);
+    });
+
     //   add item API starts Here
     //   data will be added by user through this api to mongoDB
-    app.post("/addItem", async (req, res) => {
+    app.post("/products", async (req, res) => {
       const userItem = req.body;
-      const addedItem = await machinesCollection(userItem);
+      const addedItem = await machinesCollection.insertOne(userItem);
       res.send(addedItem);
     });
     //   add item API Ends here
+
+    // get item for individual
+    app.get("/addedByUser", async (req, res) => {
+      console.log(req.query);
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = machinesCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
+    // get item for individual ends here
+
+    // added by user product data change from frontend and delete from db and ui
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const removedItem = await machinesCollection.deleteOne(query);
+      res.send(removedItem);
+    });
   } finally {
     //
   }
