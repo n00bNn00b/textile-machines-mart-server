@@ -13,6 +13,7 @@ app.use(express.json());
  *
  * ==============================
  * JWT Verification Function
+ * 256bit encryption
  * ==============================
  *
  */
