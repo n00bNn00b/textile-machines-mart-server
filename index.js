@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,6 +8,29 @@ const port = process.env.PORT || 5000;
 // middleware to connect frontend with backend
 app.use(cors());
 app.use(express.json());
+
+/**
+ *
+ * ==============================
+ * JWT Verification Function
+ * ==============================
+ *
+ */
+
+const verifyJWT = (req, res, next) => {
+  const authenticationHeader = req.headers.authorization;
+  if (!authenticationHeader) {
+    return req.status(401).send({ message: "Unauthorized Access!" });
+  }
+  const token = authenticationHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "Access Forbidden!" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 
 /**
  *
@@ -100,6 +123,15 @@ const run = async () => {
       const query = { _id: ObjectId(id) };
       const removedItem = await machinesCollection.deleteOne(query);
       res.send(removedItem);
+    });
+
+    //JWT Authentication API
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ accessToken });
     });
   } finally {
     //
