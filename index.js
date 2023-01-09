@@ -107,13 +107,18 @@ const run = async () => {
     //   add item API Ends here
 
     // get item for individual
-    app.get("/addedByUser", async (req, res) => {
+    app.get("/addedByUser", verifyJWT, async (req, res) => {
       console.log(req.query);
+      const decodedEmail = req.decoded.email;
       const email = req.query.email;
-      const query = { email: email };
-      const cursor = machinesCollection.find(query);
-      const products = await cursor.toArray();
-      res.send(products);
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const cursor = machinesCollection.find(query);
+        const products = await cursor.toArray();
+        res.send(products);
+      } else {
+        res.status(403).send({ message: "Access Forbidden!" });
+      }
     });
     // get item for individual ends here
 
